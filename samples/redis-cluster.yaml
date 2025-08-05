@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: redis
+  repo: https://charts.bitnami.com/bitnami
+  releaseName: redis-cluster
+  namespace: redis
+  version: 17.0.0
+  valuesInline:
+    architecture: replication
+    auth:
+      enabled: true
+      sentinel: true
+    master:
+      persistence:
+        enabled: true
+        size: 8Gi
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 200m
+    replica:
+      replicaCount: 2
+      persistence:
+        enabled: true
+        size: 8Gi
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 200m
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    networkPolicy:
+      enabled: true
+      allowExternal: false 

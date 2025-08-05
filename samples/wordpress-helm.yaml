@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: wordpress
+  repo: https://charts.bitnami.com/bitnami
+  releaseName: wordpress
+  namespace: wordpress
+  version: 15.0.0
+  valuesInline:
+    wordpressUsername: admin
+    wordpressPassword: mypassword123
+    wordpressEmail: admin@example.com
+    wordpressFirstName: Admin
+    wordpressLastName: User
+    wordpressBlogName: My Blog
+    mariadb:
+      enabled: true
+      auth:
+        rootPassword: rootpassword123
+        database: wordpress
+        username: wordpress
+        password: wordpresspass123
+    service:
+      type: LoadBalancer
+    ingress:
+      enabled: true
+      hostname: wordpress.local
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod 

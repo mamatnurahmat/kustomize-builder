@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- service.yaml
+
+patches:
+- target:
+    kind: Deployment
+    name: nginx-deployment
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 3
+    - op: replace
+      path: /spec/template/spec/containers/0/image
+      value: nginx:1.21
+
+configMapGenerator:
+- name: nginx-config
+  literals:
+  - server_tokens=off
+  - client_max_body_size=10m
+
+secretGenerator:
+- name: nginx-secret
+  literals:
+  - username=admin
+  - password=secret123 
