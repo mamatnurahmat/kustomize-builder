@@ -8,6 +8,28 @@ import shutil
 
 app = Flask(__name__)
 
+def _extract_helm_set_args(values_inline, prefix=''):
+    """Extract helm --set arguments from valuesInline dictionary"""
+    helm_args = []
+    
+    for key, value in values_inline.items():
+        current_key = f"{prefix}.{key}" if prefix else key
+        
+        if isinstance(value, dict):
+            # Recursively handle nested dictionaries
+            helm_args.extend(_extract_helm_set_args(value, current_key))
+        elif isinstance(value, bool):
+            # Handle boolean values
+            helm_args.append(f"--set {current_key}={str(value).lower()}")
+        elif isinstance(value, (int, float)):
+            # Handle numeric values
+            helm_args.append(f"--set {current_key}={value}")
+        else:
+            # Handle string values
+            helm_args.append(f"--set {current_key}={value}")
+    
+    return helm_args
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -68,8 +90,79 @@ def validate():
     try:
         yaml_content = request.json.get('yaml_content', '')
         yaml.safe_load(yaml_content)
-        return jsonify({'valid': True, 'error': None})
+        
+        # Generate a sample directory name for display
+        sample_dir = "my-kustomization"
+        
+        # Generate the kustomize build command
+        build_command = f"kustomize build --enable-helm {sample_dir}"
+        
+        # Generate bash script with EOF
+        bash_script = f"""#!/bin/bash
+
+# Create directory
+mkdir -p {sample_dir}
+
+# Create kustomization.yaml using EOF
+cat > {sample_dir}/kustomization.yaml << 'EOF'
+{yaml_content}
+EOF
+
+# Run kustomize build
+kustomize build --enable-helm {sample_dir}
+"""
+
+        # Parse YAML to extract valuesInline for dynamic helm template
+        try:
+            yaml_data = yaml.safe_load(yaml_content)
+            helm_set_args = []
+            
+            # Extract valuesInline from the first helmChart
+            if 'helmCharts' in yaml_data and len(yaml_data['helmCharts']) > 0:
+                first_chart = yaml_data['helmCharts'][0]
+                if 'valuesInline' in first_chart:
+                    values_inline = first_chart['valuesInline']
+                    helm_set_args = _extract_helm_set_args(values_inline)
+            
+            # Generate helm template script with dynamic set arguments
+            helm_set_string = ' '.join(helm_set_args) if helm_set_args else '--set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front'
+            
+            helm_script = f"""#!/bin/bash
+
+# Add helm repository
+helm repo add loyaltolpi https://newrahmat.bitbucket.io
+
+# Update helm repositories
+helm repo update
+
+# Run helm template with dynamic set arguments
+helm template loyaltolpi/qoin {helm_set_string}
+"""
+        except Exception as e:
+            # Fallback to default values if parsing fails
+            helm_script = f"""#!/bin/bash
+
+# Add helm repository
+helm repo add loyaltolpi https://newrahmat.bitbucket.io
+
+# Update helm repositories
+helm repo update
+
+# Run helm template with set arguments
+helm template loyaltolpi/qoin --set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front
+"""
+        
+        return jsonify({
+            'valid': True, 
+            'error': None,
+            'build_command': build_command,
+            'sample_dir': sample_dir,
+            'bash_script': bash_script,
+            'helm_script': helm_script
+        })
     except yaml.YAMLError as e:
+        return jsonify({'valid': False, 'error': str(e)})
+    except Exception as e:
         return jsonify({'valid': False, 'error': str(e)})
 
 @app.route('/samples', methods=['GET'])

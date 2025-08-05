@@ -8,10 +8,13 @@ A modern web application for building and testing Kustomize YAML configurations 
 - 🎨 **Modern UI**: Beautiful gradient design with responsive layout
 - 📝 **CodeMirror editor**: Syntax highlighting and auto-completion for YAML
 - ⚡ **Real-time generation**: Generate Kubernetes manifests with `kustomize build --enable-helm`
-- ✅ **YAML validation**: Built-in YAML syntax validation
+- ✅ **YAML validation**: Built-in YAML syntax validation with build command preview
 - 📋 **Sample templates**: Pre-loaded sample Kustomize configurations
 - 🔄 **Live preview**: Instant feedback on your Kustomize configurations
 - 📋 **Copy Output**: Copy generated Kubernetes manifests after successful generation
+- 🚀 **Build command preview**: See the exact kustomize build command when validating
+- 🐚 **Bash script generation**: Generate complete bash scripts with EOF heredoc for easy execution
+- ⚓ **Helm template script**: Generate helm template scripts with set arguments
 
 ## Prerequisites
 
@@ -73,7 +76,7 @@ curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack
 
 1. **Load Sample**: Select a sample from the dropdown to load a pre-configured Kustomize template
 2. **Edit YAML**: Modify the YAML in the left panel using the syntax-highlighted editor
-3. **Validate**: Click "✅ Validate" to check YAML syntax
+3. **Validate**: Click "✅ Validate" to check YAML syntax and see the build command
 4. **Generate**: Click "⚡ Generate" to build your Kustomize configuration
 5. **View Output**: See the generated Kubernetes manifests in the right panel
 6. **Copy Output**: Use the "📋 Copy Output" button that appears after successful generation
@@ -81,6 +84,9 @@ curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack
 ### Copy Features
 
 - **📋 Copy Output**: Copy the generated Kubernetes manifests (appears after successful generation)
+- **📋 Copy Command**: Copy the kustomize build command (appears when validating YAML)
+- **📋 Copy Script**: Copy the complete bash script with EOF heredoc (appears when validating YAML)
+- **⚓ Helm Template**: Generate helm template scripts with set arguments (appears when validating YAML)
 
 ### Sample Configurations
 
@@ -111,7 +117,9 @@ Or simply add YAML files to the `samples/` directory with `.yaml` or `.yml` exte
 
 - **YAML Editor**: Powered by CodeMirror with syntax highlighting, line numbers, and auto-indentation
 - **Generate Button**: Executes `kustomize build --enable-helm` on your configuration
-- **Validation**: Checks YAML syntax before generation
+- **Validation**: Checks YAML syntax and shows the exact build command to run
+- **Bash Script Generation**: Creates complete bash scripts with EOF heredoc for easy manual execution
+- **Helm Template Script**: Creates helm template scripts with dynamic set arguments extracted from valuesInline (includes helm repo add and update)
 - **Error Handling**: Displays detailed error messages if generation fails
 - **Responsive Design**: Works on desktop and mobile devices
 
@@ -157,16 +165,21 @@ app.run(debug=False, host='0.0.0.0', port=5000)
 
 ```
 kustomization-builder/
-├── app.py              # Main Flask application
-├── requirements.txt    # Python dependencies
-├── README.md          # This file
-├── samples/           # Sample YAML configurations
+├── app.py                    # Main Flask application
+├── requirements.txt          # Python dependencies
+├── README.md                # This file
+├── BASH_SCRIPT_GUIDE.md     # Bash script usage guide
+├── example_script.sh        # Example bash script
+├── example_helm_script.sh   # Example helm template script
+├── test_validate.py         # Test script for validate endpoint
+├── add_sample.py            # Utility to add new samples
+├── samples/                 # Sample YAML configurations
 │   ├── qoin-helm.yaml
 │   ├── nginx-basic.yaml
 │   ├── wordpress-helm.yaml
 │   └── redis-cluster.yaml
 └── templates/
-    └── index.html     # Web interface template
+    └── index.html           # Web interface template
 ```
 
 ### Adding Features

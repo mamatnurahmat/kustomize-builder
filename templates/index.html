@@ -270,6 +270,71 @@
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
         }
 
+        .build-info {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .build-info h4 {
+            color: #495057;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .build-info h4:first-child {
+            margin-top: 0;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .build-info ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .build-info li {
+            margin: 8px 0;
+            color: #495057;
+            line-height: 1.5;
+        }
+
+        .build-info code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+
+        .script-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .script-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .script-box code {
+            background: none;
+            padding: 0;
+            color: #68d391;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -425,6 +490,7 @@
 
         async function validateYaml() {
             const yamlContent = editor.getValue();
+            const output = document.getElementById('output');
             
             try {
                 const response = await fetch('/validate', {
@@ -439,11 +505,53 @@
                 
                 if (result.valid) {
                     showStatus('✅ YAML is valid!', 'success');
+                    
+                                         // Display kustomize build information in the right panel
+                     const buildInfo = `
+                         <div class="success-output">✅ YAML is valid!</div>
+                         <div class="build-info">
+                             <h4>🐚 Bash Script (with EOF):</h4>
+                             <div class="script-box">
+                                 <pre><code>${result.bash_script}</code></pre>
+                             </div>
+                             
+                             <h4>⚓ Helm Template Script:</h4>
+                             <div class="script-box">
+                                 <pre><code>${result.helm_script}</code></pre>
+                             </div>
+                             
+                             <h4>💡 How to run manually:</h4>
+                             <ol>
+                                 <li><strong>Option 1:</strong> Copy the bash script above and run it</li>
+                                 <li><strong>Option 2:</strong> Copy the helm template script above and run it</li>
+                                 <li><strong>Option 3:</strong> Create a directory for your kustomization</li>
+                                 <li>Save your YAML as <code>kustomization.yaml</code> in that directory</li>
+                                 <li>Run: <code>${result.build_command}</code></li>
+                                 <li><strong>Option 4:</strong> Use the "Generate" button above to run it automatically</li>
+                             </ol>
+                         </div>
+                     `;
+                    
+                    output.innerHTML = buildInfo;
                 } else {
                     showStatus(`❌ YAML Error: ${result.error}`, 'error');
+                    
+                    // Display error in the right panel
+                    output.innerHTML = `
+                        <div class="error-output">❌ YAML Validation Failed</div>
+                        <div class="output-content" style="color: #dc3545;">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
                 }
             } catch (error) {
                 showStatus('❌ Validation failed', 'error');
+                output.innerHTML = `
+                    <div class="error-output">❌ Validation Failed</div>
+                    <div class="output-content" style="color: #dc3545;">
+                        Network error occurred while validating YAML.
+                    </div>
+                `;
             }
         }
 
@@ -524,6 +632,22 @@
                 } else {
                     showStatus('❌ No output to copy', 'error');
                 }
+            }
+        }
+
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showStatus('✅ Command copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatus('✅ Command copied to clipboard!', 'success');
             }
         }
 
