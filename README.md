@@ -1,203 +1,262 @@
-# 🚀 Kustomize Builder Web App
+# 🚀 Kustomize Builder
 
-A modern web application for building and testing Kustomize YAML configurations with real-time preview.
+A web-based tool for building and managing Kustomize YAML configurations with real-time validation and Kubernetes manifest generation.
 
-## Features
+## ✨ Features
 
-- ✨ **Split-pane interface**: Edit YAML on the left, see generated output on the right
-- 🎨 **Modern UI**: Beautiful gradient design with responsive layout
-- 📝 **CodeMirror editor**: Syntax highlighting and auto-completion for YAML
-- ⚡ **Real-time generation**: Generate Kubernetes manifests with `kustomize build --enable-helm`
-- ✅ **YAML validation**: Built-in YAML syntax validation with build command preview
-- 📋 **Sample templates**: Pre-loaded sample Kustomize configurations
-- 🔄 **Live preview**: Instant feedback on your Kustomize configurations
-- 📋 **Copy Output**: Copy generated Kubernetes manifests after successful generation
-- 🚀 **Build command preview**: See the exact kustomize build command when validating
-- 🐚 **Bash script generation**: Generate complete bash scripts with EOF heredoc for easy execution
-- ⚓ **Helm template script**: Generate helm template scripts with set arguments
+- **📝 YAML Editor**: Syntax-highlighted editor with CodeMirror
+- **🔍 Real-time Validation**: Validate Kustomize YAML syntax
+- **⚡ Live Generation**: Generate Kubernetes manifests instantly
+- **📋 Sample Management**: Dynamic sample loading from local files
+- **🐚 Bash Script Generation**: Generate executable bash scripts with EOF
+- **⚓ Helm Template Scripts**: Generate Helm template commands with dynamic set arguments
+- **📋 Copy Output**: Copy generated manifests to clipboard
+- **🎨 Modern UI**: Responsive design with beautiful interface
+- **📊 Statistics**: Display line count and resource statistics
+- **🔄 Flexible Layout**: Dynamic container sizing
 
-## Prerequisites
+## 🛠️ Installation
 
-- Python 3.7 or higher
-- Kustomize CLI installed and available in PATH
-- Helm (for Helm chart support)
+### Option 1: Docker (Recommended)
 
-### Installing Kustomize
-
-#### Windows (PowerShell):
-```powershell
-# Using Chocolatey
-choco install kustomize
-
-# Or download from GitHub releases
-# https://github.com/kubernetes-sigs/kustomize/releases
-```
-
-#### macOS:
+#### Quick Start
 ```bash
-# Using Homebrew
-brew install kustomize
+# Clone the repository
+git clone <repository-url>
+cd kustomization-builder
 
-# Or using MacPorts
-sudo port install kustomize
+# Run with Docker Compose
+docker-compose up -d
+
+# Access the application
+open http://localhost:5000
 ```
 
-#### Linux:
+#### Development Mode
 ```bash
-# Using snap
-sudo snap install kustomize
+# Run in development mode with hot reloading
+docker-compose -f docker-compose.dev.yml up -d
 
-# Or download binary
-curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
 ```
 
-## Installation
-
-1. **Clone or download the project files**
-
-2. **Install Python dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run the application**:
-   ```bash
-   python app.py
-   ```
-
-4. **Open your browser** and navigate to:
-   ```
-   http://localhost:5000
-   ```
-
-## Usage
-
-### Basic Workflow
-
-1. **Load Sample**: Select a sample from the dropdown to load a pre-configured Kustomize template
-2. **Edit YAML**: Modify the YAML in the left panel using the syntax-highlighted editor
-3. **Validate**: Click "✅ Validate" to check YAML syntax and see the build command
-4. **Generate**: Click "⚡ Generate" to build your Kustomize configuration
-5. **View Output**: See the generated Kubernetes manifests in the right panel
-6. **Copy Output**: Use the "📋 Copy Output" button that appears after successful generation
-
-### Copy Features
-
-- **📋 Copy Output**: Copy the generated Kubernetes manifests (appears after successful generation)
-- **📋 Copy Command**: Copy the kustomize build command (appears when validating YAML)
-- **📋 Copy Script**: Copy the complete bash script with EOF heredoc (appears when validating YAML)
-- **⚓ Helm Template**: Generate helm template scripts with set arguments (appears when validating YAML)
-
-### Sample Configurations
-
-The application comes with several pre-configured Kustomize samples:
-
-- **Qoin Helm**: Custom Helm chart configuration for Qoin application
-- **Nginx Basic**: Basic nginx deployment with patches and generators
-- **WordPress Helm**: Complete WordPress setup with MariaDB and ingress
-- **Redis Cluster**: Redis cluster with replication and monitoring
-
-All samples are stored in the `samples/` directory and can be easily extended by adding new YAML files.
-
-### Adding New Samples
-
-You can add new samples using the utility script:
-
+#### Production Mode with Nginx
 ```bash
-# List all available samples
-python add_sample.py list
+# Run with nginx reverse proxy
+docker-compose --profile production up -d
 
-# Add a new sample
-python add_sample.py add
+# Access via HTTPS (requires SSL certificates)
+open https://localhost
 ```
 
-Or simply add YAML files to the `samples/` directory with `.yaml` or `.yml` extension.
+### Option 2: Local Development
 
-### Features Explained
+#### Prerequisites
+- Python 3.9+
+- Kustomize CLI
+- Helm CLI
 
-- **YAML Editor**: Powered by CodeMirror with syntax highlighting, line numbers, and auto-indentation
-- **Generate Button**: Executes `kustomize build --enable-helm` on your configuration
-- **Validation**: Checks YAML syntax and shows the exact build command to run
-- **Bash Script Generation**: Creates complete bash scripts with EOF heredoc for easy manual execution
-- **Helm Template Script**: Creates helm template scripts with dynamic set arguments extracted from valuesInline (includes helm repo add and update)
-- **Error Handling**: Displays detailed error messages if generation fails
-- **Responsive Design**: Works on desktop and mobile devices
+#### Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd kustomization-builder
 
-## API Endpoints
+# Install dependencies
+pip install -r requirements.txt
 
-- `GET /`: Main web interface
-- `POST /generate`: Generate Kustomize output
-- `POST /validate`: Validate YAML syntax
-- `GET /samples`: Get list of available samples
-- `GET /samples/<filename>`: Get content of a specific sample file
+# Run the application
+python app.py
 
-## Troubleshooting
-
-### Common Issues
-
-1. **"kustomize command not found"**
-   - Ensure Kustomize is installed and available in your system PATH
-   - Restart your terminal/command prompt after installation
-
-2. **"Permission denied"**
-   - On Windows, run PowerShell as Administrator
-   - On Linux/macOS, ensure the script has execute permissions
-
-3. **"Port 5000 already in use"**
-   - Change the port in `app.py` line 67: `app.run(debug=True, host='0.0.0.0', port=5001)`
-
-4. **Helm chart errors**
-   - Ensure Helm is installed: `helm version`
-   - Check that the Helm repository is accessible
-
-### Debug Mode
-
-The application runs in debug mode by default. For production deployment:
-
-```python
-# In app.py, change the last line to:
-app.run(debug=False, host='0.0.0.0', port=5000)
+# Access the application
+open http://localhost:5000
 ```
 
-## Development
+## 🐳 Docker Commands
 
-### Project Structure
+### Build and Run
+```bash
+# Build the image
+docker build -t kustomize-builder .
+
+# Run the container
+docker run -p 5000:5000 kustomize-builder
+
+# Run with volume mounts
+docker run -p 5000:5000 -v $(pwd)/samples:/app/samples:ro kustomize-builder
+```
+
+### Docker Compose Commands
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs -f kustomize-builder
+
+# Rebuild and restart
+docker-compose up -d --build
+
+# Clean up
+docker-compose down -v
+```
+
+## 📁 Project Structure
 
 ```
 kustomization-builder/
-├── app.py                    # Main Flask application
-├── requirements.txt          # Python dependencies
-├── README.md                # This file
-├── BASH_SCRIPT_GUIDE.md     # Bash script usage guide
-├── example_script.sh        # Example bash script
-├── example_helm_script.sh   # Example helm template script
-├── test_validate.py         # Test script for validate endpoint
-├── add_sample.py            # Utility to add new samples
-├── samples/                 # Sample YAML configurations
-│   ├── qoin-helm.yaml
-│   ├── nginx-basic.yaml
-│   ├── wordpress-helm.yaml
-│   └── redis-cluster.yaml
-└── templates/
-    └── index.html           # Web interface template
+├── app.py                 # Main Flask application
+├── templates/
+│   └── index.html        # Frontend template
+├── samples/              # YAML sample files
+│   ├── default.yaml
+│   └── go-template.yaml
+├── Dockerfile            # Docker image definition
+├── docker-compose.yml    # Production compose file
+├── docker-compose.dev.yml # Development compose file
+├── requirements.txt      # Python dependencies
+├── .dockerignore        # Docker ignore file
+├── nginx/
+│   └── nginx.conf       # Nginx configuration
+├── add_sample.py        # Sample management utility
+├── test_app.py          # Application tests
+├── test_validate.py     # Validation tests
+├── example_script.sh    # Example bash script
+├── example_helm_script.sh # Example helm script
+└── README.md           # This file
 ```
 
-### Adding Features
+## 🔧 Configuration
 
-- **New Kustomize features**: Modify the `generate()` function in `app.py`
-- **UI improvements**: Edit the CSS and JavaScript in `templates/index.html`
-- **Additional validation**: Extend the `validate()` function
+### Environment Variables
+- `FLASK_APP`: Application entry point (default: app.py)
+- `FLASK_ENV`: Environment mode (development/production)
+- `PYTHONUNBUFFERED`: Python output buffering (default: 1)
 
-## Security Notes
+### Docker Environment
+- `FLASK_APP=app.py`
+- `FLASK_ENV=production`
+- `PYTHONUNBUFFERED=1`
 
-- The application runs `kustomize build` commands with user-provided input
-- In production, consider implementing input sanitization
-- The debug mode should be disabled in production environments
+## 📋 Usage
 
-## License
+### 1. Load Samples
+- Use the dropdown to select from available samples
+- Samples are loaded from the `samples/` directory
+- Default template is automatically loaded
 
-This project is open source and available under the MIT License.
+### 2. Edit YAML
+- Edit the Kustomize YAML in the left panel
+- Real-time syntax highlighting
+- Auto-indentation and bracket matching
 
-## Contributing
+### 3. Validate
+- Click "Validate" to check YAML syntax
+- View generated bash and helm scripts
+- See manual execution instructions
 
-Feel free to submit issues and enhancement requests! 
+### 4. Generate
+- Click "Generate" to build Kubernetes manifests
+- View statistics (lines, resources)
+- Copy output to clipboard
+
+## 🐚 Generated Scripts
+
+### Bash Script Features
+- Creates directory structure
+- Uses EOF heredoc for file creation
+- Runs `kustomize build --enable-helm`
+- Includes error handling
+
+### Helm Template Script Features
+- Adds Helm repository (`loyaltolpi`)
+- Updates repositories
+- Dynamic `--set` arguments from `valuesInline`
+- Alternative `values.yaml` file option
+- Uses `loyaltolpi/qoin` chart
+
+## 🛠️ Development
+
+### Adding Samples
+```bash
+# Use the utility script
+python add_sample.py
+
+# Or manually add files to samples/
+echo "your-yaml-content" > samples/my-sample.yaml
+```
+
+### Testing
+```bash
+# Run application tests
+python test_app.py
+
+# Run validation tests
+python test_validate.py
+```
+
+### Docker Development
+```bash
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Rebuild after changes
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+## 🔒 Security
+
+### Production Deployment
+- Use HTTPS with proper SSL certificates
+- Configure nginx reverse proxy
+- Set up rate limiting
+- Use non-root user in containers
+- Regular security updates
+
+### Security Headers
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- X-XSS-Protection: 1; mode=block
+- Strict-Transport-Security
+
+## 📊 Monitoring
+
+### Health Checks
+- Application health check at `/`
+- Docker health check with curl
+- Nginx health check at `/health`
+
+### Logging
+- Application logs to stdout/stderr
+- Nginx access and error logs
+- Docker container logs
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For issues and questions:
+1. Check the documentation
+2. Review existing issues
+3. Create a new issue with details
+
+---
+
+**Happy Kustomizing! 🚀** 
