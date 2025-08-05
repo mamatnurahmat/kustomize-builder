@@ -127,6 +127,9 @@ kustomize build --enable-helm {sample_dir}
             # Generate helm template script with dynamic set arguments
             helm_set_string = ' '.join(helm_set_args) if helm_set_args else '--set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front'
             
+            # Generate values.yaml content from valuesInline
+            values_yaml = yaml.dump(values_inline, default_flow_style=False, indent=2) if 'valuesInline' in first_chart else ""
+            
             helm_script = f"""#!/bin/bash
 
 # Add helm repository
@@ -135,11 +138,31 @@ helm repo add loyaltolpi https://newrahmat.bitbucket.io
 # Update helm repositories
 helm repo update
 
-# Run helm template with dynamic set arguments
+# Option 1: Run helm template with dynamic set arguments
 helm template loyaltolpi/qoin {helm_set_string}
+
+# Option 2: Create values.yaml and run helm template
+cat > values.yaml << 'EOF'
+{values_yaml}
+EOF
+
+helm template loyaltolpi/qoin -f values.yaml
 """
         except Exception as e:
             # Fallback to default values if parsing fails
+            default_values_yaml = """name: qoin-be-client-manager
+port: 8086
+image:
+  repo: loyaltolpi/qoin-be-client-manager
+  tag: 2e6d963
+privateReg:
+  enabled: true
+secretName: regcred
+selector:
+  enabled: true
+nodeSelector:
+  nodetype: front"""
+            
             helm_script = f"""#!/bin/bash
 
 # Add helm repository
@@ -148,8 +171,15 @@ helm repo add loyaltolpi https://newrahmat.bitbucket.io
 # Update helm repositories
 helm repo update
 
-# Run helm template with set arguments
+# Option 1: Run helm template with set arguments
 helm template loyaltolpi/qoin --set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front
+
+# Option 2: Create values.yaml and run helm template
+cat > values.yaml << 'EOF'
+{default_values_yaml}
+EOF
+
+helm template loyaltolpi/qoin -f values.yaml
 """
         
         return jsonify({

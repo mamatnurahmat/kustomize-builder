@@ -39,5 +39,23 @@ helm repo add loyaltolpi https://newrahmat.bitbucket.io
 # Update helm repositories
 helm repo update
 
-# Run helm template with dynamic set arguments (extracted from valuesInline)
-helm template loyaltolpi/qoin --set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front 
+# Option 1: Run helm template with dynamic set arguments (extracted from valuesInline)
+helm template loyaltolpi/qoin --set name=qoin-be-client-manager --set port=8086 --set image.repo=loyaltolpi/qoin-be-client-manager --set image.tag=2e6d963 --set privateReg.enabled=true --set secretName=regcred --set selector.enabled=true --set nodeSelector.nodetype=front
+
+# Option 2: Create values.yaml and run helm template
+cat > values.yaml << 'EOF'
+name: qoin-be-client-manager
+port: 8086
+image:
+  repo: loyaltolpi/qoin-be-client-manager
+  tag: 2e6d963
+privateReg:
+  enabled: true
+secretName: regcred
+selector:
+  enabled: true
+nodeSelector:
+  nodetype: front
+EOF
+
+helm template loyaltolpi/qoin -f values.yaml 

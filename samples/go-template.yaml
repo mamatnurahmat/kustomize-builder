@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: qoin
+  repo: https://newrahmat.bitbucket.io
+  releaseName: qoin
+  namespace: admin
+  version: 0.11.0
+  valuesInline:
+    name: qoin-be-client-manager
+    port: 8086
+    port2:
+      enabled: false
+    containerPort2: 9999
+    namePort2: "grpc" 
+    image:
+      repo: loyaltolpi/qoin-be-client-manager
+      tag: 2e6d963
+    # servicetype ClusterIP/NodePort
+    servicetype: ClusterIP
+    replicaCount: 1
+# imagePullSecrets for private registry    
+    privateReg:
+      enabled: true
+    secretName: regcred
+    selector:
+      enabled: true
+    nodeSelector:
+      nodetype: front 
+    ##dotnet-v1###########
+    # if true enabled dotnet with arg --environment
+    arg:
+      enabled: false
+              # args:
+              # - dotnet
+              # - {{ .Values.name }}.dll
+              # - --environment={{ .Values.env }}
+    ##dotnet-v1###########
+
+    ##dotnet-v2###########
+    # if true enabled dotnet env variable
+    envVar:
+      enabled: false
+    envName: "" 
+    # envName: "ASPNETCORE_ENVIRONMENT" #manager/front 
+    # envName: "DOTNET_ENVIRONMENT" #module/back 
+              # env:
+              # - name: {{ .Values.envName }}
+              #   value: {{ .Values.env }}
+    ##dotnet-v2###########
+
+    # default tz Asia/Jakarta
+    timezone:
+      enabled: true
+      path: /usr/share/zoneinfo/Asia/Jakarta
