@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: newrahmat/kustomize-builder
     container_name: kustomize-builder-dev
     ports:
       - "5000:5000"
@@ -14,13 +15,13 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - PYTHONUNBUFFERED=1
-    volumes:
-      # Mount source code for hot reloading
-      - .:/app
-      # Mount samples directory for persistent storage
-      - ./samples:/app/samples:ro
-      # Mount logs directory
-      - ./logs:/app/logs
+    # volumes:
+    #   # Mount source code for hot reloading
+    #   - .:/app
+    #   # Mount samples directory for persistent storage
+    #   - ./samples:/app/samples:ro
+    #   # Mount logs directory
+    #   - ./logs:/app/logs
     restart: unless-stopped
     networks:
       - kustomize-network-dev
@@ -45,6 +46,6 @@ networks:
     driver: bridge
     name: kustomize-network-dev
 
-volumes:
+# volumes:
   # redis_data:
   #   driver: local 
