@@ -333,11 +333,109 @@
             word-wrap: break-word;
         }
 
-                 .script-box code {
-             background: none;
-             padding: 0;
-             color: #68d391;
-         }
+                         .script-box code {
+            background: none;
+            padding: 0;
+            color: #68d391;
+        }
+
+        .script-header, .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .script-header span, .option-header span {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            background: #4a5568;
+            color: #e2e8f0;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copy-btn:hover {
+            background: #2d3748;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .copy-btn:hover::before {
+            left: 100%;
+        }
+
+        .copy-icon {
+            font-size: 14px;
+        }
+
+        .copy-text {
+            font-weight: 500;
+        }
+
+        .copy-btn.copied {
+            background: #38a169;
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .option-box {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            border-left: 4px solid #4299e1;
+        }
+
+        .option-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .option-box code {
+            background: none;
+            padding: 0;
+            color: #68d391;
+        }
 
                  .welcome-message {
             text-align: center;
@@ -693,12 +791,38 @@ helmCharts:
                          <div class="build-info">
                              <h4>🐚 Bash Script (with EOF):</h4>
                              <div class="script-box">
+                                 <div class="script-header">
+                                     <span>Bash Script</span>
+                                     <button class="copy-btn" onclick="copyToClipboard(\`${result.bash_script}\`, this)">
+                                         <span class="copy-icon">📋</span>
+                                         <span class="copy-text">Copy</span>
+                                     </button>
+                                 </div>
                                  <pre><code>${result.bash_script}</code></pre>
                              </div>
                              
                              <h4>⚓ Helm Template Script:</h4>
                              <div class="script-box">
+                                 <div class="script-header">
+                                     <span>Helm Template Script</span>
+                                     <button class="copy-btn" onclick="copyToClipboard(\`${result.helm_script}\`, this)">
+                                         <span class="copy-icon">📋</span>
+                                         <span class="copy-text">Copy</span>
+                                     </button>
+                                 </div>
                                  <pre><code>${result.helm_script}</code></pre>
+                             </div>
+                             
+                             <h4>🔧 Option 1: Run helm template with dynamic set arguments</h4>
+                             <div class="option-box">
+                                 <div class="option-header">
+                                     <span>Helm Template Command</span>
+                                     <button class="copy-btn" onclick="copyToClipboard(\`${result.helm_command}\`, this)">
+                                         <span class="copy-icon">📋</span>
+                                         <span class="copy-text">Copy</span>
+                                     </button>
+                                 </div>
+                                 <pre><code>${result.helm_command}</code></pre>
                              </div>
                              
                              <h4>💡 How to run manually:</h4>
@@ -881,9 +1005,24 @@ helmCharts:
             }
         }
 
-        async function copyToClipboard(text) {
+        async function copyToClipboard(text, button) {
             try {
                 await navigator.clipboard.writeText(text);
+                
+                // Add visual feedback
+                button.classList.add('copied');
+                
+                // Update button text temporarily
+                const copyText = button.querySelector('.copy-text');
+                const originalText = copyText.textContent;
+                copyText.textContent = 'Copied!';
+                
+                // Reset button text and class after 2 seconds
+                setTimeout(() => {
+                    copyText.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
                 showStatus('✅ Command copied to clipboard!', 'success');
             } catch (err) {
                 // Fallback for older browsers
@@ -893,6 +1032,21 @@ helmCharts:
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
+                
+                // Add visual feedback
+                button.classList.add('copied');
+                
+                // Update button text temporarily
+                const copyText = button.querySelector('.copy-text');
+                const originalText = copyText.textContent;
+                copyText.textContent = 'Copied!';
+                
+                // Reset button text and class after 2 seconds
+                setTimeout(() => {
+                    copyText.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
                 showStatus('✅ Command copied to clipboard!', 'success');
             }
         }

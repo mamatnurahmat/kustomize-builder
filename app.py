@@ -188,7 +188,8 @@ helm template loyaltolpi/qoin -f values.yaml
             'build_command': build_command,
             'sample_dir': sample_dir,
             'bash_script': bash_script,
-            'helm_script': helm_script
+            'helm_script': helm_script,
+            'helm_command': f"helm template loyaltolpi/qoin {helm_set_string}"
         })
     except yaml.YAMLError as e:
         return jsonify({'valid': False, 'error': str(e)})
