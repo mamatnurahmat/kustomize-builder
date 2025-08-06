@@ -1,0 +1,270 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: qoin
+  repo: https://newrahmat.bitbucket.io
+  releaseName: qoin
+  namespace: admin
+  version: 0.11.0
+  valuesInline:
+    # Default values for qoin.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    # =======================================================
+    name: devops-be-sample-manager
+    project: devops
+    type: front
+    env: develop
+    port: 8080
+    ##go-v2####################
+
+    ##with grpc port###########
+    port2:
+      enabled: false
+    containerPort2: 9999
+    namePort2: "grpc"
+    ##go-v2###################
+
+    image:
+      repo: newrahmat/devops-be-sample-manager
+      pullPolicy: IfNotPresent
+      tag: "latest"
+      # repo: k8s.gcr.io/ubuntu-slim
+      # pullPolicy: IfNotPresent
+      # tag: "0.1"
+
+    #if true pod deploy by nodeSelector
+    selector:
+      enabled: false
+
+    #nodetype front/back
+    nodeSelector:
+      nodetype: front
+
+    # servicetype ClusterIP/NodePort
+    servicetype: ClusterIP
+
+    replicaCount: 1
+
+    ##dotnet-v1###########
+    # if true enabled dotnet with arg --environment
+    arg:
+      enabled: false
+              # args:
+              # - dotnet
+              # - {{ .Values.name }}.dll
+              # - --environment={{ .Values.env }}
+    ##dotnet-v1###########
+
+    ##dotnet-v2###########
+    # if true enabled dotnet env variable
+    envVar:
+      enabled: false
+    envName: ""
+    # envName: "ASPNETCORE_ENVIRONMENT" #manager/front
+    # envName: "DOTNET_ENVIRONMENT" #module/back
+              # env:
+              # - name: {{ .Values.envName }}
+              #   value: {{ .Values.env }}
+    ##dotnet-v2###########
+
+    # default tz Asia/Jakarta
+    timezone:
+      enabled: true
+      path: /usr/share/zoneinfo/Asia/Jakarta
+    # imagePullSecrets for private registry
+    privateReg:
+      enabled: false
+      secretName: "regcred"
+
+    imagePullSecrets: []
+    nameOverride: ""
+    fullnameOverride: ""
+
+    # liveness and readiness Probe
+    # if true set volumeMounts /tmp/health
+    probe:
+      enabled: false
+
+    readinessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+      successThreshold: 1
+      timeoutSeconds: 1
+
+    livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+      successThreshold: 1
+      timeoutSeconds: 1
+
+
+
+    serviceAccount:
+      # Specifies whether a service account should be created
+      create: false
+      # Annotations to add to the service account
+      annotations: {}
+      # The name of the service account to use.
+      # If not set and create is true, a name is generated using the fullname template
+      name: ""
+
+    podAnnotations: {}
+
+    podSecurityContext: {}
+      # fsGroup: 2000
+
+    securityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      hosts:
+        - host: chart-sample.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      tls: []
+      #  - secretName: chart-sample-tls
+      #    hosts:
+      #      - chart-sample.local
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+    # hpa autoscaling
+    autoscaling:
+      enabled: false
+      minReplicas: 3
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+
+
+    # vpa
+    # https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
+
+    vpa:
+      enabled: false
+    MinAllowedCpu: 100m
+    MinAllowedMemory: 50Mi
+    MaxAllowedCpu: 1
+    MaxAllowedMemory: 350Mi
+    # VpaResourcePolicy:
+    #   resourcePolicy:
+    #     containerPolicies:
+    #       - containerName: '*'
+    #         minAllowed:
+    #           cpu: 100m
+    #           memory: 50Mi
+    #         maxAllowed:
+    #           cpu: 1
+    #           memory: 500Mi
+    #         controlledResources: ["cpu", "memory"]
+
+
+    # vpa autoscaling test
+    VpaTest:
+      enabled: false
+
+    testConnection:
+      enabled: false
+
+    containersTest:
+      containers:
+        - name: busybox
+          image: busybox
+          command: ["/bin/sh"]
+          args: ["-c", "echo 'exit' | telnet qoin-be-sample2-manager 80"]
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 0
+
+
+    configmap:
+      enabled: false
+    ConfigMapData:
+      APP_PORT: "8888"
+      APP_ENV: develop
+    # nodeSelector: {}
+
+    CmEnvFile:
+      enabled: false
+    # kubectl -n develop-crypwal create configmap cm-env-qoin-be-sample2-manager --from-file=.env
+
+    #before enabled=true
+    # kubectl create -n develop-devops secret generic dotenv-devops-be-sample-manager --from-file=.env=.env.develop --dry-run=client -o yaml | kubectl apply -f -
+    # helm -n develop-devops install devops-be-sample-manager loyaltolpi/qoin --set dotenv.enabled=true
+    # helm -n develop-devops template devops-be-sample-manager loyaltolpi/qoin --set dotenv.enabled=true | kubectl apply -f -
+    fileConfig:
+      enabled: false
+
+    fileMount:
+      enabled: false
+    fileMountPath: "/"
+    filesubPath: ".env"
+
+    fileMount2:
+      enabled: false
+    fileMountPath2: "/"
+    filesubPath2: ".app.config"
+
+
+    # appseting:
+    #   enabled: false
+    # fileMountPathAppConfig: "app"
+    # subPathAppConfig: ".app.config"
+
+    dataSecret:
+      enabled: false
+    fileBase64: "xxxxbase64xxxfilexxxxx"
+    file2Base64: "xxxxbase64xxxfile2xxxxx"
+
+    # fileSecret: ".env.develop"
+    # fileSecret2: ".app.config.develop"
+    # dataSecretKey: ".env"
+    # dataSecretValue: encodebase64value
+    # dataSecretKey2: ".app.config"
+    # dataSecretValue2: "encodebase64value2"
+    #   .env: yoursecret
+    #base64encode
+
+
+    # {{ .Values.subPathFile | quote }}: {{ .Files.Get .Values.subPathFile | b64enc | quote }}
+      # {{ .Values.dataSecretKey2 }}: {{ .Values.dataSecretValue2 }}
+
+    tolerations: []
+
+    affinity: {}
+
+
+

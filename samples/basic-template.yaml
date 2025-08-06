@@ -10,20 +10,27 @@ helmCharts:
   valuesInline:
     name: qoin-be-client-manager
     port: 8086
+# port2 is optional
     port2:
       enabled: false
     containerPort2: 9999
     namePort2: "grpc" 
+# image repo and tag    
     image:
       repo: loyaltolpi/qoin-be-client-manager
       tag: 2e6d963
     # servicetype ClusterIP/NodePort
     servicetype: ClusterIP
+# replicaCount is optional
     replicaCount: 1
+
 # imagePullSecrets for private registry    
+# kubectl create secret docker-registry regcred --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
     privateReg:
       enabled: true
     secretName: regcred
+ # if true enabled pod deploy by nodeSelector
+ # nodetype front/back
     selector:
       enabled: true
     nodeSelector:
@@ -43,8 +50,10 @@ helmCharts:
     envVar:
       enabled: false
     envName: "" 
-    # envName: "ASPNETCORE_ENVIRONMENT" #manager/front 
-    # envName: "DOTNET_ENVIRONMENT" #module/back 
+    #manager/front 
+    # envName: "ASPNETCORE_ENVIRONMENT" 
+    #module/back 
+    # envName: "DOTNET_ENVIRONMENT" 
               # env:
               # - name: {{ .Values.envName }}
               #   value: {{ .Values.env }}
@@ -54,3 +63,22 @@ helmCharts:
     timezone:
       enabled: true
       path: /usr/share/zoneinfo/Asia/Jakarta
+#fileConfig is optional volume mount secret file-config-volume from fileConfig.enabled=true
+    fileConfig:
+      enabled: false
+
+    fileMount:
+      enabled: false
+    fileMountPath: "/"
+    filesubPath: ".env"
+
+    fileMount2:
+      enabled: false
+    fileMountPath2: "/"
+    filesubPath2: ".app.config"
+# dataSecret is optional volume mount secret data-secret-volume from dataSecret.enabled=true
+    dataSecret:
+      enabled: false
+    fileBase64: "xxxxbase64xxxfilexxxxx"
+    file2Base64: "xxxxbase64xxxfile2xxxxx"
+

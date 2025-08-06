@@ -8,7 +8,7 @@ services:
     image: newrahmat/kustomize-builder
     container_name: kustomize-builder-dev
     ports:
-      - "5000:5000"
+      - "5555:5000"
       - "5678:5678"  # For debugging
     environment:
       - FLASK_APP=app.py
